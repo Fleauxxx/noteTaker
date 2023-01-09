@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
-// const uuid = require('./helpers/uuid');
+const uuid = require('./helpers/uuid');
 
 const PORT = 3001;
 
@@ -16,6 +16,51 @@ app.use(express.static('public'));
 app.get('/notes', (req, res) =>
   res.sendFile(path.join(__dirname, '/public/notes.html'))
 );
+
+app.get('*', (req, res) =>
+  res.sendFile(path.join(__dirname, '/public/index.html'))
+);
+
+app.get('/api/notes', )
+
+// Post request to add a note
+app.post('/api/notes', (req, res) => {
+  // Log that a Post request was received
+  console.info(`${req.method} request received to add a note`);
+// Destructuring assignment for the items in req.body
+  const { title, text } = req.body;
+
+// if all require properties are present
+  if (title && text) {
+
+// variable for the object we will save
+    const newNote = {
+
+      title,
+      text,
+      note_id: uuid(),
+    };
+
+    // Convert the data to a string so we can save it
+    const noteString = JSON.stringify(newNote);
+
+    //Write the string to a file
+    fs.writeFile(`.db/${newNote.title}.json`, noteString, (err) =>
+    err
+    ? console.error(err)
+    : console.log(`Note for ${newNote.title} has been written to JSON file`));
+
+    const response = {
+      status: 'success',
+      body: new noteString,
+    };
+
+    console.log(response);
+    res.status(201).json(response);
+  } else {
+    res.status(500).json('Error in adding note');
+  }
+});
 
 
 
